@@ -1,0 +1,8 @@
+Django-versionedcache is a cache backend for Django that:
+
+ - uses MintCache (inspired heavily by http://www.djangosnippets.org/snippets/155/)
+ - prepends settings.VERSION to any cache keyto allow gracefull update - you
+   can deploy new version of your application without the need for restarting
+   your memcached - two versions of the same app can coexist on one memcached
+   cluster.
+
