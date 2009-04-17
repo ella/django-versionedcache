@@ -34,10 +34,9 @@ class TestMintCache(CachetestCase):
         self.assert_equals(None, cache.get('cache-key'))
 
     def test_cache_stales_only_once_after_some_time(self):
-        cache.set('cache-key', 'cache value', timeout=0.4)
-        time.sleep(0.3)
+        cache.set('cache-key', 'cache value', timeout=4)
+        time.sleep(3.5)
         self.assert_equals(None, cache.get('cache-key'))
-        time.sleep(0.1)
         self.assert_equals('cache value', cache.get('cache-key'))
 
 class TestVersioning(CachetestCase):
