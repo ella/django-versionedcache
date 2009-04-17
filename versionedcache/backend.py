@@ -1,6 +1,7 @@
 import time
 
 from django.core.cache.backends import memcached, base
+from django.utils.encoding import smart_unicode, smart_str
 
 from django.conf import settings
 
@@ -29,16 +30,18 @@ class CacheClass(memcached.CacheClass):
         return self._cache.add(self._tag_key(key), *self._tag_value(value, timeout))
  
     def get(self, key, default=None):
-        val = self._cache.get(self._tag_key(key))
+        key = self._tag_key(key)
+
+        val = self._cache.get(key)
 
         if val:
             # unpack timeout
             val, stale_time, delay = val
 
             # cache is stale, refresh
-            if stale_time and stale_time > time.time():
+            if stale_time and stale_time <= time.time():
                 # keep the stale value in cache for delay seconds ...
-                self._cache.set(self._tag_key(key), (value, None, 0), delay)
+                self._cache.set(key, (val, None, 0), delay)
                 # ... and return the default so that the caller will regenerate the cache
                 return default
 
@@ -52,7 +55,7 @@ class CacheClass(memcached.CacheClass):
  
     def set(self, key, value, timeout=0):
         if isinstance(value, unicode):
-            value = value.encode('utf-8')
+            value = smart_str(value)
         self._cache.set(self._tag_key(key), *self._tag_value(value, timeout))
  
     def get_many(self, keys):

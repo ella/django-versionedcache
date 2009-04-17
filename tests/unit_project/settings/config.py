@@ -37,8 +37,6 @@ SECRET_KEY = '88b-01f^x4lh$-s5-hdccnicekg07)niir2g6)93!0#k(=mfv$'
 #if isinstance(LOGGING_CONFIG_FILE, basestring) and isfile(LOGGING_CONFIG_FILE):
 #    logging.config.fileConfig(LOGGING_CONFIG_FILE)
 
-# we want to reset whole cache in test
-# until we do that, don't use cache
-CACHE_BACKEND = 'dummy://'
+CACHE_BACKEND = 'versionedcache.backend://127.0.0.1:11211/'
 
 
