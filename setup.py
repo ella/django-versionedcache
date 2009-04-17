@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
-import djangobaselibrary
+import versionedcache
 
-version = "%d.%d.%d" % djangobaselibrary.VERSION
+version = "%d.%d.%d" % versionedcache.VERSION
 
 setup(
-    name = 'djangobaselibrary',
+    name = 'versionedcache',
     version = version,
     description = 'django base library',
     long_description = '\n'.join((
