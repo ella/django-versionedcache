@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import time 
 
-from nose import SkipTest
 from djangosanetesting import UnitTestCase
 
 from django.core.cache import cache
@@ -12,7 +11,7 @@ class CachetestCase(UnitTestCase):
     def setUp(self):
         super(CachetestCase, self).setUp()
         if not isinstance(cache, backend.CacheClass):
-            raise SkipTest
+            raise self.SkipTest()
 
     def tearDown(self):
         cache._cache.flush_all()
