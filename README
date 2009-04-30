@@ -5,4 +5,12 @@ Django-versionedcache is a cache backend for Django that:
    can deploy new version of your application without the need for restarting
    your memcached - two versions of the same app can coexist on one memcached
    cluster.
+ - to use
+     - put versionedcache.backend in settings.CACHE_BACKEND where you
+       would normaly use memcached, the rest is the same (IP adresses, ports and
+       options to memcached are passed along)
+     - maintain a VERSION string in your settings, when you change it,
+       versionedcache will use it to identify cache keys belonging to that
+       specific version, just change it on update to start using new set of keys
+     - see tests/unit_test/settings for example usage
 
