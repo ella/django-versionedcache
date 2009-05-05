@@ -59,7 +59,8 @@ class CacheClass(memcached.CacheClass):
         self._cache.set(self._tag_key(key), *self._tag_value(value, timeout))
  
     def get_many(self, keys):
-        return map(lambda x: x[0], self._cache.get_multi(map(self._tag_key,keys)))
+        key_map = dict((self._tag_key(k), k) for k in keys)
+        return dict( (key_map[k], v[0]) for (k,v) in super(CacheClass, self).get_many(key_map.keys()).items())
  
     def incr(self, key, delta=1):
         return base.BaseCache.incr(self, key, delta)
