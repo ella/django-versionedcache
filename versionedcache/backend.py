@@ -62,8 +62,8 @@ class CacheClass(memcached.CacheClass):
         return map(lambda x: x[0], self._cache.get_multi(map(self._tag_key,keys)))
  
     def incr(self, key, delta=1):
-        return base.BaseCache.incr(self, self._tag_key(key), delta)
+        return base.BaseCache.incr(self, key, delta)
  
     def decr(self, key, delta=1):
-        return base.BaseCache.decr(self, self._tag_key(key), delta)
+        return base.BaseCache.decr(self, key, delta)
 

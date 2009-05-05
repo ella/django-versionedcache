@@ -44,3 +44,17 @@ class TestVersioning(CachetestCase):
         cache.set('cache-key', 'cache value')
         settings.VERSION += 'NEW'
         self.assert_equals(None, cache.get('cache-key'))
+
+class TestIncrDecr(CachetestCase):
+    def test_incr_works(self):
+        cache.set('key', 0)
+        cache.incr('key')
+        self.assert_equals(1, cache.get('key'))
+
+    def test_decr_works(self):
+        cache.set('key', 10)
+        cache.decr('key')
+        self.assert_equals(9, cache.get('key'))
+
+    def test_incr_throws_error_on_non_existing_key(self):
+        self.assert_raises(ValueError, cache.incr, 'non-existent-key')
