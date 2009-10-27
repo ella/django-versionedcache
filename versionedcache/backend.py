@@ -9,8 +9,12 @@ DEFAULT_TIMEOUT_RATIO = 3.0/4.0
 
 class CacheClass(memcached.CacheClass):
 
+    def __init__(self, server, params):
+        self._version = params.get('version', getattr(settings, 'VERSION', ''))
+        super(CacheClass, self).__init__(server, params)
+
     def _tag_key(self, key):
-        return getattr(settings, 'VERSION', '') + smart_str(key)
+        return self._version + smart_str(key)
 
     def _tag_value(self, value, timeout):
         """
