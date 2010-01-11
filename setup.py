@@ -6,10 +6,11 @@ version = "%d.%d.%d" % versionedcache.VERSION
 setup(
     name = 'versionedcache',
     version = version,
-    description = 'django base library',
+    description = 'django versioned cache',
     long_description = '\n'.join((
-        'django base library',
-        'template for other libs',
+        'django versioned cache',
+        '',
+        'version aware memcache backend for django',
     )),
     author = 'centrum holdings s.r.o',
     license = 'BSD',
@@ -22,7 +23,6 @@ setup(
     include_package_data = True,
 
     entry_points={
-        'setuptools.file_finders': ['dummy = setuptools_entry:dummylsfiles'],
     },
 
     install_requires = [
