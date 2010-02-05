@@ -14,3 +14,14 @@ Django-versionedcache is a cache backend for Django that:
        specific version, just change it on update to start using new set of keys
      - see tests/unit_test/settings for example usage
 
+Django-versionedcache also includes a debugging cache backend that wraps
+versionedcache backend and adds the following features:
+
+ - ability (for supersusers only!) to turn the cache off per request
+ - ability (for supersusers only!) to turn the cache to write-only mode
+
+This is very usefull if you need to debug something on deoployed site and need
+to turn the cache off to see the actual results immediately. Once you fix the
+problem, you reload the page in write-only mode and the cache will get
+overriden with what you saw and want.
+

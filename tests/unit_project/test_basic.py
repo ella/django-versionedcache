@@ -1,22 +1,10 @@
 # -*- coding: utf-8 -*-
 import time 
 
-from djangosanetesting import UnitTestCase
-
 from django.core.cache import get_cache
 from django.conf import settings
 
-from versionedcache import backend
-
-class CachetestCase(UnitTestCase):
-    def setUp(self):
-        super(CachetestCase, self).setUp()
-        self.cache = get_cache(settings.CACHE_BACKEND)
-        if not isinstance(self.cache, backend.CacheClass):
-            raise self.SkipTest()
-
-    def tearDown(self):
-        self.cache._cache.flush_all()
+from helpers import CachetestCase
 
 class TestMintCache(CachetestCase):
     def test_cache_expires(self):
