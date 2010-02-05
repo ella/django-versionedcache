@@ -13,17 +13,16 @@ ADMIN_MEDIA_PREFIX = '/admin_media/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'unit_project.template_loader.load_template_source',
 )
 
 MIDDLEWARE_CLASSES = (
-    'versionedcache.middleware.CacheDebugMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'versionedcache.middleware.CacheDebugMiddleware',
 )
 
-ROOT_URLCONF = ''
+ROOT_URLCONF = 'unit_project.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".

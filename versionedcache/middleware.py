@@ -1,11 +1,11 @@
-from django.core.cache import cache
+from django.core import cache
 from django.core.exceptions import MiddlewareNotUsed
 
 from versionedcache.debug import CacheClass
 
 class CacheDebugMiddleware(object):
     def __init__(self):
-        if not isinstance(cache, CacheClass):
+        if not isinstance(cache.cache, CacheClass):
             raise MiddlewareNotUsed()
 
     def process_request(self, request):
@@ -17,5 +17,5 @@ class CacheDebugMiddleware(object):
                 return
             
             # implement action
-            getattr(cache, action)()
+            getattr(cache.cache, action)()
 
