@@ -25,3 +25,12 @@ to turn the cache off to see the actual results immediately. Once you fix the
 problem, you reload the page in write-only mode and the cache will get
 overriden with what you saw and want.
 
+To use just add 'versionedcache.middleware.CacheDebugMiddleware' after
+'django.contrib.auth.middleware.AuthenticationMiddleware' in your
+MIDDLEWARE_CLASSES and use versionedcache.debug:// scheme for your
+CACHE_BACKEND with the same options you would use for versionedcache.backend or
+memcached. Then when superuser supplies cache_debug=turn_off or
+cache_debug=write_only get parameters to any URL it will take effect for that
+request only.
+
+Note: CacheDebugMiddleware is not thread safe
