@@ -14,7 +14,7 @@ class CacheClass(memcached.CacheClass):
         super(CacheClass, self).__init__(server, params)
 
     def _tag_key(self, key):
-        return smart_str((self._version or getattr(settings, 'CACHE_VERSION', '')) + smart_str(key)).encode('ascii', 'ignore')[:250]
+        return smart_str((self._version or getattr(settings, 'CACHE_VERSION', '')) + smart_str(key)).decode('ascii', 'ignore')[:250]
 
     def _tag_value(self, value, timeout):
         """
