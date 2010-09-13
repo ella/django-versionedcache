@@ -61,6 +61,9 @@ class CacheClass(memcached.CacheClass):
         if isinstance(value, unicode):
             value = smart_str(value)
         self._cache.set(self._tag_key(key), *self._tag_value(value, timeout))
+
+    def delete(self, key, *args, **kwargs):
+        super(CacheClass, self).delete(self._tag_key(key), *args, **kwargs)
  
     def get_many(self, keys):
         key_map = dict((self._tag_key(k), k) for k in keys)

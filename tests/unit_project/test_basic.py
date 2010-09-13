@@ -74,4 +74,9 @@ class TestMethods(CachetestCase):
         self.cache.set('cache-key', 'cache value')
         self.assert_equals({'cache-key': 'cache value'}, self.cache.get_many(['cache-key', 'non-existent-key']))
 
+    def test_delete_deletes_versioned_cache(self):
+        self.cache.set('key', 10)
+        self.cache.delete('key')
+        self.assert_equals(None, self.cache.get('key'))
+
 
