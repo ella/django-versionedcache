@@ -13,6 +13,45 @@ class CacheClass(memcached.CacheClass):
         self._version = params.get('version', None)
         super(CacheClass, self).__init__(server, params)
 
+        self._tune_server()
+
+    def _tune_server(self):
+        '''
+        set some connection-related properties to memcache server
+        (expects python-memcached bindings)
+        '''
+        if not (hasattr(settings, 'MEMCACHE_TUNE') and type(settings.MEMCACHE_TUNE) == dict):
+            return
+
+        if not (self._cache and hasattr(self._cache, 'servers')):
+            return
+
+        props = ('_SOCKET_TIMEOUT', '_DEAD_RETRY')
+        tune_props = {}
+        for prop in props:
+            if prop in settings.MEMCACHE_TUNE.keys():
+                tune_props[prop] = settings.MEMCACHE_TUNE[prop]
+
+        for server in self._cache.servers:
+            for prop in tune_props:
+                if not hasattr(server, prop):
+                    # if it's missing in one server, others will miss it probably too
+                    del tune_props[prop]
+                    continue
+
+                if hasattr(tune_props[prop], '__call__'):
+                    prop_val = tune_props[prop].__call__()
+                else:
+                    prop_val = tune_props[prop]
+
+                #  we don't want to use non-numeric values
+                if type(prop_val) not in (int, float):
+                    del tune_props[prop]
+                    continue
+
+                setattr(server, prop, prop_val)
+
+
     def _tag_key(self, key):
         return str(smart_str((self._version or getattr(settings, 'CACHE_VERSION', '')) + smart_str(key)).decode('ascii', 'ignore')[:250])
 
