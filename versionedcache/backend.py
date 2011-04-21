@@ -23,6 +23,12 @@ class CacheClass(memcached.CacheClass):
         if not (hasattr(settings, 'MEMCACHE_TUNE') and type(settings.MEMCACHE_TUNE) == dict):
             return
 
+        try:
+            from memcache import _Host
+        except ImportError:
+            # probably different memcache bindings
+            return
+
         if not (self._cache and hasattr(self._cache, 'servers')):
             return
 
@@ -32,24 +38,20 @@ class CacheClass(memcached.CacheClass):
             if prop in settings.MEMCACHE_TUNE.keys():
                 tune_props[prop] = settings.MEMCACHE_TUNE[prop]
 
-        for server in self._cache.servers:
-            for prop in tune_props:
-                if not hasattr(server, prop):
-                    # if it's missing in one server, others will miss it probably too
-                    del tune_props[prop]
-                    continue
+        for prop in tune_props:
+            if not hasattr(_Host, prop):
+                continue
 
-                if hasattr(tune_props[prop], '__call__'):
-                    prop_val = tune_props[prop].__call__()
-                else:
-                    prop_val = tune_props[prop]
+            if hasattr(tune_props[prop], '__call__'):
+                prop_val = tune_props[prop].__call__()
+            else:
+                prop_val = tune_props[prop]
 
-                #  we don't want to use non-numeric values
-                if type(prop_val) not in (int, float):
-                    del tune_props[prop]
-                    continue
+            #  we don't want to use non-numeric values
+            if type(prop_val) not in (int, float):
+                continue
 
-                setattr(server, prop, prop_val)
+            setattr(_Host, prop, prop_val)
 
 
     def _tag_key(self, key):
