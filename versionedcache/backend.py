@@ -20,7 +20,7 @@ class CacheClass(memcached.CacheClass):
         set some connection-related properties to memcache server
         (expects python-memcached bindings)
         '''
-        if not (hasattr(settings, 'MEMCACHE_TUNE') and type(settings.MEMCACHE_TUNE) == dict):
+        if not hasattr(settings, 'MEMCACHE_TUNE'):
             return
 
         try:
@@ -35,15 +35,15 @@ class CacheClass(memcached.CacheClass):
         props = ('_SOCKET_TIMEOUT', '_DEAD_RETRY')
         tune_props = {}
         for prop in props:
-            if prop in settings.MEMCACHE_TUNE.keys():
+            if prop in settings.MEMCACHE_TUNE:
                 tune_props[prop] = settings.MEMCACHE_TUNE[prop]
 
         for prop in tune_props:
             if not hasattr(_Host, prop):
                 continue
 
-            if hasattr(tune_props[prop], '__call__'):
-                prop_val = tune_props[prop].__call__()
+            if callable(tune_props[prop]):
+                prop_val = tune_props[prop]()
             else:
                 prop_val = tune_props[prop]
 
@@ -73,7 +73,7 @@ class CacheClass(memcached.CacheClass):
         if isinstance(value, unicode):
             value = value.encode('utf-8')
         return self._cache.add(self._tag_key(key), *self._tag_value(value, timeout))
- 
+
     def get(self, key, default=None):
         key = self._tag_key(key)
 
@@ -96,8 +96,8 @@ class CacheClass(memcached.CacheClass):
             if isinstance(val, basestring):
                 return smart_unicode(val)
             else:
-                return val 
- 
+                return val
+
     def set(self, key, value, timeout=0):
         if isinstance(value, unicode):
             value = smart_str(value)
@@ -105,14 +105,14 @@ class CacheClass(memcached.CacheClass):
 
     def delete(self, key, *args, **kwargs):
         super(CacheClass, self).delete(self._tag_key(key), *args, **kwargs)
- 
+
     def get_many(self, keys):
         key_map = dict((self._tag_key(k), k) for k in keys)
         return dict( (key_map[k], v[0]) for (k,v) in super(CacheClass, self).get_many(key_map.keys()).items())
- 
+
     def incr(self, key, delta=1):
         return base.BaseCache.incr(self, key, delta)
- 
+
     def decr(self, key, delta=1):
         return base.BaseCache.decr(self, key, delta)
 
