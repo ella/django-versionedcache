@@ -7,11 +7,10 @@ from django.conf import settings
 
 DEFAULT_TIMEOUT_RATIO = 3.0/4.0
 
-class CacheClass(memcached.CacheClass):
-
+class VersionHerdMixin(object):
     def __init__(self, server, params):
-        self._version = params.get('version', None)
-        super(CacheClass, self).__init__(server, params)
+        self._version = params.pop('version', None)
+        super(VersionHerdMixin, self).__init__(server, params)
 
     def _tag_key(self, key):
         return str(smart_str((self._version or getattr(settings, 'CACHE_VERSION', '')) + smart_str(key)).decode('ascii', 'ignore')[:250])
@@ -31,12 +30,12 @@ class CacheClass(memcached.CacheClass):
     def add(self, key, value, timeout=0):
         if isinstance(value, unicode):
             value = value.encode('utf-8')
-        return super(CacheClass, self).add(self._tag_key(key), *self._tag_value(value, timeout))
+        return super(VersionHerdMixin, self).add(self._tag_key(key), *self._tag_value(value, timeout))
 
     def get(self, key, default=None):
         key = self._tag_key(key)
 
-        val = super(CacheClass, self).get(key)
+        val = super(VersionHerdMixin, self).get(key)
 
         if val:
             # unpack timeout
@@ -45,7 +44,7 @@ class CacheClass(memcached.CacheClass):
             # cache is stale, refresh
             if stale_time and stale_time <= time.time():
                 # keep the stale value in cache for delay seconds ...
-                super(CacheClass, self).set(key, (val, None, 0), delay)
+                super(VersionHerdMixin, self).set(key, (val, None, 0), delay)
                 # ... and return the default so that the caller will regenerate the cache
                 return default
 
@@ -60,14 +59,14 @@ class CacheClass(memcached.CacheClass):
     def set(self, key, value, timeout=0):
         if isinstance(value, unicode):
             value = smart_str(value)
-        super(CacheClass, self).set(self._tag_key(key), *self._tag_value(value, timeout))
+        super(VersionHerdMixin, self).set(self._tag_key(key), *self._tag_value(value, timeout))
 
     def delete(self, key, *args, **kwargs):
-        super(CacheClass, self).delete(self._tag_key(key), *args, **kwargs)
+        super(VersionHerdMixin, self).delete(self._tag_key(key), *args, **kwargs)
 
     def get_many(self, keys):
         key_map = dict((self._tag_key(k), k) for k in keys)
-        return dict( (key_map[k], v[0]) for (k,v) in super(CacheClass, self).get_many(key_map.keys()).items())
+        return dict( (key_map[k], v[0]) for (k,v) in super(VersionHerdMixin, self).get_many(key_map.keys()).items())
 
     def incr(self, key, delta=1):
         return base.BaseCache.incr(self, key, delta)
@@ -75,3 +74,5 @@ class CacheClass(memcached.CacheClass):
     def decr(self, key, delta=1):
         return base.BaseCache.decr(self, key, delta)
 
+class CacheClass(VersionHerdMixin, memcached.CacheClass):
+    pass
