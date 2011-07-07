@@ -72,7 +72,16 @@ class TestMethods(CachetestCase):
 
     def test_get_many(self):
         self.cache.set('cache-key', 'cache value')
-        self.assert_equals({'cache-key': 'cache value'}, self.cache.get_many(['cache-key', 'non-existent-key']))
+        self.cache.set('cache-key-herded', 'cache value II', 0.4)
+        time.sleep(0.35)
+        self.assert_equals(
+            {'cache-key': 'cache value'},
+            self.cache.get_many(['cache-key', 'cache-key-herded', 'non-existent-key'])
+        )
+        self.assert_equals(
+            {'cache-key': 'cache value', 'cache-key-herded': 'cache value II'},
+            self.cache.get_many(['cache-key', 'cache-key-herded', 'non-existent-key'])
+        )
 
     def test_delete_deletes_versioned_cache(self):
         self.cache.set('key', 10)

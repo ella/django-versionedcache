@@ -6,6 +6,7 @@ from django.utils.encoding import smart_unicode, smart_str
 from django.conf import settings
 
 DEFAULT_TIMEOUT_RATIO = 3.0/4.0
+EXPIRED = object()
 
 class VersionHerdMixin(object):
     def __init__(self, server, params):
@@ -27,6 +28,16 @@ class VersionHerdMixin(object):
         delay = 2 * (t - stale)
         return (value, stale_time, delay), t
 
+    def _check_herd_protection(self, key, value, stale_time, delay):
+        # cache is stale, refresh
+        if stale_time and stale_time <= time.time():
+            # keep the stale value in cache for delay seconds ...
+            super(VersionHerdMixin, self).set(key, (value, None, 0), delay)
+            # ... and return the default so that the caller will regenerate the cache
+            return EXPIRED
+        return value
+
+
     def add(self, key, value, timeout=0):
         if isinstance(value, unicode):
             value = value.encode('utf-8')
@@ -39,13 +50,9 @@ class VersionHerdMixin(object):
 
         if val:
             # unpack timeout
-            val, stale_time, delay = val
+            val = self._check_herd_protection(key, *val)
 
-            # cache is stale, refresh
-            if stale_time and stale_time <= time.time():
-                # keep the stale value in cache for delay seconds ...
-                super(VersionHerdMixin, self).set(key, (val, None, 0), delay)
-                # ... and return the default so that the caller will regenerate the cache
+            if val is EXPIRED:
                 return default
 
         if val is None:
@@ -66,7 +73,13 @@ class VersionHerdMixin(object):
 
     def get_many(self, keys):
         key_map = dict((self._tag_key(k), k) for k in keys)
-        return dict( (key_map[k], v[0]) for (k,v) in super(VersionHerdMixin, self).get_many(key_map.keys()).items())
+        out = {}
+        for k, v in super(VersionHerdMixin, self).get_many(key_map.keys()).items():
+            v = self._check_herd_protection(k, *v)
+            if v is EXPIRED:
+                continue
+            out[key_map[k]] = v
+        return out
 
     def incr(self, key, delta=1):
         return base.BaseCache.incr(self, key, delta)
