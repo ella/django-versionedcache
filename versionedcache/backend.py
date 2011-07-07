@@ -72,12 +72,12 @@ class CacheClass(memcached.CacheClass):
     def add(self, key, value, timeout=0):
         if isinstance(value, unicode):
             value = value.encode('utf-8')
-        return self._cache.add(self._tag_key(key), *self._tag_value(value, timeout))
+        return super(CacheClass, self).add(self._tag_key(key), *self._tag_value(value, timeout))
 
     def get(self, key, default=None):
         key = self._tag_key(key)
 
-        val = self._cache.get(key)
+        val = super(CacheClass, self).get(key)
 
         if val:
             # unpack timeout
@@ -86,7 +86,7 @@ class CacheClass(memcached.CacheClass):
             # cache is stale, refresh
             if stale_time and stale_time <= time.time():
                 # keep the stale value in cache for delay seconds ...
-                self._cache.set(key, (val, None, 0), delay)
+                super(CacheClass, self).set(key, (val, None, 0), delay)
                 # ... and return the default so that the caller will regenerate the cache
                 return default
 
@@ -101,7 +101,7 @@ class CacheClass(memcached.CacheClass):
     def set(self, key, value, timeout=0):
         if isinstance(value, unicode):
             value = smart_str(value)
-        self._cache.set(self._tag_key(key), *self._tag_value(value, timeout))
+        super(CacheClass, self).set(self._tag_key(key), *self._tag_value(value, timeout))
 
     def delete(self, key, *args, **kwargs):
         super(CacheClass, self).delete(self._tag_key(key), *args, **kwargs)
