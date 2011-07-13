@@ -46,22 +46,24 @@ class VersionHerdMixin(object):
     def get(self, key, default=None):
         key = self._tag_key(key)
 
-        val = super(VersionHerdMixin, self).get(key)
+        val = super(VersionHerdMixin, self).get(key, EXPIRED)
 
-        if val:
-            # unpack timeout
-            val = self._check_herd_protection(key, *val)
-
-            if val is EXPIRED:
-                return default
-
-        if val is None:
+        # value not in cache
+        if val is EXPIRED:
             return default
+
+        # unpack timeout
+        val = self._check_herd_protection(key, *val)
+
+        # herd protection actively refuses me the value, comply
+        if val is EXPIRED:
+            return default
+
+        # unicode is better than str
+        if isinstance(val, basestring):
+            return smart_unicode(val)
         else:
-            if isinstance(val, basestring):
-                return smart_unicode(val)
-            else:
-                return val
+            return val
 
     def set(self, key, value, timeout=0):
         if isinstance(value, unicode):
