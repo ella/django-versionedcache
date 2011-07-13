@@ -71,6 +71,11 @@ class VersionHerdMixin(object):
     def delete(self, key, *args, **kwargs):
         super(VersionHerdMixin, self).delete(self._tag_key(key), *args, **kwargs)
 
+
+    def set_many(self, data, timeout=0):
+        new_data = dict((self._tag_key(k), self._tag_value(v, timeout)[0]) for k, v in data.items())
+        return super(VersionHerdMixin, self).set_many(new_data, timeout)
+
     def get_many(self, keys):
         key_map = dict((self._tag_key(k), k) for k in keys)
         out = {}

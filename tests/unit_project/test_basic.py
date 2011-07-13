@@ -70,6 +70,11 @@ class TestMethods(CachetestCase):
         self.cache.set('cache-key', un)
         self.assert_equals(un, self.cache.get('cache-key'))
 
+    def test_set_many(self):
+        self.cache.set_many({'k': 'value', 'k2': 'other-val'})
+        self.assert_equals('value', self.cache.get('k'))
+        self.assert_equals('other-val', self.cache.get('k2'))
+
     def test_get_many(self):
         self.cache.set('cache-key', 'cache value')
         self.cache.set('cache-key-herded', 'cache value II', 0.4)
