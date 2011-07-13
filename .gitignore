@@ -1,3 +1,5 @@
 *.py[co]
 .*.sw?
 *~
+versionedcache.egg-info
+.coverage
