@@ -4,7 +4,7 @@ from django.core.cache.backends import dummy
 from versionedcache import backend
 
 READ_METHODS = ('get', 'get_many', 'has_key' )
-WRITE_METHODS = ('set', 'delete', 'add',)
+WRITE_METHODS = ('set', 'set_many', 'delete', 'add',)
 
 class CacheClass(object):
     def __init__(self, *args, **kwargs):
