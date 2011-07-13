@@ -1,4 +1,5 @@
 import time
+from collections import namedtuple
 
 from django.core.cache.backends import memcached, base
 from django.utils.encoding import smart_unicode, smart_str
@@ -8,13 +9,19 @@ from django.conf import settings
 DEFAULT_TIMEOUT_RATIO = 3.0/4.0
 EXPIRED = object()
 
+class CacheKey(str):
+    pass
+CacheValue = namedtuple('CacheValue', 'value, stale_time, delay')
+
 class VersionHerdMixin(object):
     def __init__(self, server, params):
         self._version = params.pop('version', None)
         super(VersionHerdMixin, self).__init__(server, params)
 
     def _tag_key(self, key):
-        return str(smart_str((self._version or getattr(settings, 'CACHE_VERSION', '')) + smart_str(key)).decode('ascii', 'ignore')[:250])
+        if isinstance(key, CacheKey):
+            return key
+        return CacheKey(smart_str((self._version or getattr(settings, 'CACHE_VERSION', '')) + smart_str(key)).decode('ascii', 'ignore')[:250])
 
     def _tag_value(self, value, timeout):
         """
@@ -23,16 +30,20 @@ class VersionHerdMixin(object):
         return value tuple and timeout
         """
         t = timeout or self.default_timeout
+
+        if isinstance(value, CacheValue):
+            return value, t
+
         stale = t * getattr(settings, 'TIMEOUT_RATIO', DEFAULT_TIMEOUT_RATIO)
         stale_time = time.time() + stale
         delay = 2 * (t - stale)
-        return (value, stale_time, delay), t
+        return CacheValue(value, stale_time, delay), t
 
     def _check_herd_protection(self, key, value, stale_time, delay):
         # cache is stale, refresh
         if stale_time and stale_time <= time.time():
             # keep the stale value in cache for delay seconds ...
-            super(VersionHerdMixin, self).set(key, (value, None, 0), delay)
+            super(VersionHerdMixin, self).set(key, value, delay)
             # ... and return the default so that the caller will regenerate the cache
             return EXPIRED
         return value
@@ -52,8 +63,9 @@ class VersionHerdMixin(object):
         if val is EXPIRED:
             return default
 
-        # unpack timeout
-        val = self._check_herd_protection(key, *val)
+        if isinstance(val, CacheValue):
+            # unpack timeout
+            val = self._check_herd_protection(key, *val)
 
         # herd protection actively refuses me the value, comply
         if val is EXPIRED:
@@ -81,9 +93,10 @@ class VersionHerdMixin(object):
         key_map = dict((self._tag_key(k), k) for k in keys)
         out = {}
         for k, v in super(VersionHerdMixin, self).get_many(key_map.keys(), **kwargs).items():
-            v = self._check_herd_protection(k, *v)
-            if v is EXPIRED:
-                continue
+            if isinstance(v, CacheValue):
+                v = self._check_herd_protection(k, *v)
+                if v is EXPIRED:
+                    continue
             out[key_map[k]] = v
         return out
 

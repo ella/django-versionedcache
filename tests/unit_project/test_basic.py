@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import time 
+import time
 
 from django.core.cache import get_cache
 from django.conf import settings
+
 
 from helpers import CachetestCase
 
@@ -93,4 +94,7 @@ class TestMethods(CachetestCase):
         self.cache.delete('key')
         self.assert_equals(None, self.cache.get('key'))
 
-
+    def test_cache_key_is_not_versioned_twice(self):
+        c = get_cache('backend://')
+        c.set_many({'a': 42, 'b': 'value'})
+        self.assert_equals({'a': 42, 'b': 'value'}, c.get_many(['a', 'b']))
