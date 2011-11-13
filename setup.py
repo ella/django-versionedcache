@@ -4,7 +4,7 @@ import versionedcache
 version = "%d.%d.%d" % versionedcache.VERSION
 
 setup(
-    name = 'versionedcache',
+    name = 'django-versionedcache',
     version = version,
     description = 'django versioned cache',
     long_description = '\n'.join((
@@ -27,6 +27,7 @@ setup(
 
     install_requires = [
         'setuptools>=0.6b1',
+        'Django>=1.1',
     ],
 )
 
