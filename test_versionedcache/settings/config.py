@@ -14,8 +14,8 @@ DISABLE_CACHE_TEMPLATE = DEBUG
 
 
 DATABASE_ENGINE = 'sqlite3'
-DATABASE_NAME = join(gettempdir(), 'djangobaselibary_unit_project.db')
-TEST_DATABASE_NAME =join(gettempdir(), 'test_unit_project.db')
+DATABASE_NAME = join(gettempdir(), 'djangobaselibary_test_versionedcache.db')
+TEST_DATABASE_NAME =join(gettempdir(), 'test_test_versionedcache.db')
 DATABASE_USER = ''
 DATABASE_PASSWORD = ''
 DATABASE_HOST = ''

@@ -1,5 +1,5 @@
 *.py[co]
 .*.sw?
 *~
-versionedcache.egg-info
+django_versionedcache.egg-info
 .coverage

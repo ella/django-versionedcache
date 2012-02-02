@@ -17,17 +17,19 @@ setup(
 
     packages = find_packages(
         where = '.',
-        exclude = ('docs', 'tests')
+        exclude = ('docs', 'test_versionedcache')
     ),
 
     include_package_data = True,
-
-    entry_points={
-    },
 
     install_requires = [
         'setuptools>=0.6b1',
         'Django>=1.1',
     ],
+    test_requires = [
+        'nose',
+        'coverage',
+    ],
+    test_suite='test_versionedcache.run_tests.run_all'
 )
 

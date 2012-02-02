@@ -13,10 +13,10 @@ Thus, we're changing module into package:
   * local.py contains (2) for your specific machine. File your defaults there. 
 """
 
-from unit_project.settings.base import *
-from unit_project.settings.config import *
+from test_versionedcache.settings.base import *
+from test_versionedcache.settings.config import *
 
 try:
-    from unit_project.settings.local import * 
+    from test_versionedcache.settings.local import * 
 except ImportError:
     pass

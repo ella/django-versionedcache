@@ -1,5 +1,1 @@
 Django
-
-nose
-djangosanetesting
-

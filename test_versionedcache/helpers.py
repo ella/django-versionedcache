@@ -1,4 +1,5 @@
-from djangosanetesting import UnitTestCase, DatabaseTestCase
+from unittest import TestCase as UnitTestCase
+from django.test import TestCase
 
 from django.core import cache
 from django.conf import settings
@@ -7,21 +8,20 @@ from django.core.signals import request_finished
 
 from versionedcache import backend, debug
 
+from nose import SkipTest
+
 class CachetestCase(UnitTestCase):
     def setUp(self):
         super(CachetestCase, self).setUp()
         self.cache = cache.get_cache(settings.CACHE_BACKEND)
         if not isinstance(self.cache, (debug.CacheClass, backend.CacheClass)):
-            raise self.SkipTest()
+            raise SkipTest()
 
     def tearDown(self):
         self.cache._cache.flush_all()
 
 
-class CachetestDatabaseCase(DatabaseTestCase):
-    def setUp(self):
-        super(CachetestCase, self).setUp()
-
+class CachetestDatabaseCase(TestCase):
     def setUp(self):
         super(CachetestDatabaseCase, self).setUp()
         cache.cache = cache.get_cache(settings.CACHE_BACKEND)

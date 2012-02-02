@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-urlpatterns = patterns('unit_project.views',
+urlpatterns = patterns('test_versionedcache.views',
     (r'^set/$', 'set'),
     (r'^get/([^/]*)/$', 'get'),
 )

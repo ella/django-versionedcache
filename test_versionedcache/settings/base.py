@@ -22,7 +22,7 @@ MIDDLEWARE_CLASSES = (
     'versionedcache.middleware.CacheDebugMiddleware',
 )
 
-ROOT_URLCONF = 'unit_project.urls'
+ROOT_URLCONF = 'test_versionedcache.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
