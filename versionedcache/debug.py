@@ -9,7 +9,7 @@ WRITE_METHODS = ('set', 'set_many', 'delete', 'add',)
 class CacheClass(object):
     def __init__(self, *args, **kwargs):
         self.__cache = backend.CacheClass(*args, **kwargs)
-        self.__dummy_cache = dummy.CacheClass()
+        self.__dummy_cache = dummy.CacheClass(*args, **kwargs)
         request_finished.connect(self.return_to_normal)
         self.return_to_normal()
 

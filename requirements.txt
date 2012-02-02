@@ -1,6 +1,5 @@
-Django>=1.1,<1.2
+Django
 
 nose
 djangosanetesting
-git+http://github.com/ella/citools.git#egg=citools
 
