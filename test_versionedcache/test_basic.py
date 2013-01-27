@@ -2,7 +2,6 @@
 import time
 
 from django.core.cache import get_cache
-from django.conf import settings
 
 from helpers import CachetestCase
 
@@ -22,10 +21,10 @@ class TestMintCache(CachetestCase):
 
 class TestVersioning(CachetestCase):
     def test_version_separation(self):
-        self.cache.set('cache-key', 'cache value')
-        settings.CACHE_BACKEND += '?version=NEW'
-        self.cache = get_cache(settings.CACHE_BACKEND)
-        tools.assert_equals(None, self.cache.get('cache-key'))
+        c = get_cache('test_versionedcache.backend://?version=OLD')
+        c.set('cache-key', 'cache value')
+        c = get_cache('test_versionedcache.backend://?version=NEW')
+        tools.assert_equals(None, c.get('cache-key'))
 
 class TestMethods(CachetestCase):
     def test_incr_works(self):

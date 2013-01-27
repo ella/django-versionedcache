@@ -13,16 +13,7 @@ class CacheKey(str):
     pass
 CacheValue = namedtuple('CacheValue', 'value, stale_time, delay')
 
-class VersionHerdMixin(object):
-    def __init__(self, server, params):
-        self._version = params.pop('version', None)
-        super(VersionHerdMixin, self).__init__(server, params)
-
-    def _tag_key(self, key):
-        if isinstance(key, CacheKey):
-            return key
-        return CacheKey(smart_str((self._version or getattr(settings, 'CACHE_VERSION', '')) + smart_str(key)).decode('ascii', 'ignore')[:250])
-
+class HerdMixin(object):
     def _tag_value(self, value, timeout):
         """
         Add staleness information to the value when setting.
@@ -43,7 +34,7 @@ class VersionHerdMixin(object):
         # cache is stale, refresh
         if stale_time and stale_time <= time.time():
             # keep the stale value in cache for delay seconds ...
-            super(VersionHerdMixin, self).set(key, value, delay)
+            super(HerdMixin, self).set(key, value, delay)
             # ... and return the default so that the caller will regenerate the cache
             return EXPIRED
         return value
@@ -52,12 +43,10 @@ class VersionHerdMixin(object):
     def add(self, key, value, timeout=0, **kwargs):
         if isinstance(value, unicode):
             value = value.encode('utf-8')
-        return super(VersionHerdMixin, self).add(self._tag_key(key), *self._tag_value(value, timeout), **kwargs)
+        return super(HerdMixin, self).add(key, *self._tag_value(value, timeout), **kwargs)
 
     def get(self, key, default=None, **kwargs):
-        key = self._tag_key(key)
-
-        val = super(VersionHerdMixin, self).get(key, EXPIRED, **kwargs)
+        val = super(HerdMixin, self).get(key, EXPIRED, **kwargs)
 
         # value not in cache
         if val is EXPIRED:
@@ -80,24 +69,20 @@ class VersionHerdMixin(object):
     def set(self, key, value, timeout=0, **kwargs):
         if isinstance(value, unicode):
             value = smart_str(value)
-        super(VersionHerdMixin, self).set(self._tag_key(key), *self._tag_value(value, timeout), **kwargs)
-
-    def delete(self, key, *args, **kwargs):
-        super(VersionHerdMixin, self).delete(self._tag_key(key), *args, **kwargs)
+        super(HerdMixin, self).set(key, *self._tag_value(value, timeout), **kwargs)
 
     def set_many(self, data, timeout=0, **kwargs):
-        new_data = dict((self._tag_key(k), self._tag_value(v, timeout)[0]) for k, v in data.items())
-        return super(VersionHerdMixin, self).set_many(new_data, timeout, **kwargs)
+        new_data = dict((k, self._tag_value(v, timeout)[0]) for k, v in data.items())
+        return super(HerdMixin, self).set_many(new_data, timeout, **kwargs)
 
     def get_many(self, keys, **kwargs):
-        key_map = dict((self._tag_key(k), k) for k in keys)
         out = {}
-        for k, v in super(VersionHerdMixin, self).get_many(key_map.keys(), **kwargs).items():
+        for k, v in super(HerdMixin, self).get_many(keys, **kwargs).items():
             if isinstance(v, CacheValue):
                 v = self._check_herd_protection(k, *v)
                 if v is EXPIRED:
                     continue
-            out[key_map[k]] = v
+            out[k] = v
         return out
 
     def incr(self, key, delta=1, **kwargs):
@@ -106,5 +91,11 @@ class VersionHerdMixin(object):
     def decr(self, key, delta=1, **kwargs):
         return base.BaseCache.decr(self, key, delta, **kwargs)
 
-class CacheClass(VersionHerdMixin, memcached.CacheClass):
+class VersionHerdMixin(HerdMixin):
+    def __init__(self, server, params):
+        if 'version' in params:
+            params.setdefault('VERSION', params.pop('version'))
+        super(VersionHerdMixin, self).__init__(server, params)
+
+class CacheClass(HerdMixin, memcached.CacheClass):
     pass
